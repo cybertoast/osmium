@@ -4,18 +4,33 @@
 #
 #------------------------------------------------------------------------------
 
+uname_S := $(shell sh -c 'uname -s 2>/dev/null || echo not')
+
+ifeq ($(uname_S),Linux)
+    ROOT_GROUP = root
+    ROOT_USER = root
+endif
+ifeq ($(uname_S),GNU/kFreeBSD)
+    ROOT_GROUP = root
+    ROOT_USER = root
+endif
+ifeq ($(uname_S),Darwin)
+    ROOT_GROUP = wheel
+    ROOT_USER = root
+endif
+
 all:
 
 clean:
 	rm -fr doc/html
 
 install: doc
-	install -m 755 -g root -o root -d $(DESTDIR)/usr/include
-	install -m 755 -g root -o root -d $(DESTDIR)/usr/share/doc/libosmium-dev
-	install -m 644 -g root -o root README $(DESTDIR)/usr/share/doc/libosmium-dev/README
-	install -m 644 -g root -o root include/osmium.hpp $(DESTDIR)/usr/include
-	cp --recursive include/osmium $(DESTDIR)/usr/include
-	cp --recursive doc/html $(DESTDIR)/usr/share/doc/libosmium-dev
+	install -m 755 -g $(ROOT_GROUP) -o $(ROOT_USER) -d $(DESTDIR)/usr/include
+	install -m 755 -g $(ROOT_GROUP) -o $(ROOT_USER) -d $(DESTDIR)/usr/share/doc/libosmium-dev
+	install -m 644 -g $(ROOT_GROUP) -o $(ROOT_USER) README $(DESTDIR)/usr/share/doc/libosmium-dev/README
+	install -m 644 -g $(ROOT_GROUP) -o $(ROOT_USER) include/osmium.hpp $(DESTDIR)/usr/include
+	cp -r include/osmium $(DESTDIR)/usr/include
+	cp -r doc/html $(DESTDIR)/usr/share/doc/libosmium-dev
 
 check:
 	cppcheck --enable=all -I include */*.cpp test/*/test_*.cpp
